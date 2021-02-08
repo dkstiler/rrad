@@ -29,6 +29,9 @@ Ext.define('Rd.view.dynamicDetails.gridDynamicDetails' ,{
 
         me.columns  = [
           /*  {xtype: 'rownumberer',stateId: 'StateGridDynamicDetails1'},*/
+            { text: 'Item ID',    dataIndex: 'id',     tdCls: 'gridTree', width: 80, filter: {type: 'string'},stateId: 'StateGridDynamicDetails1',
+                hidden: true
+            },
             { text: i18n('sOwner'),    dataIndex: 'owner',     tdCls: 'gridTree', flex: 1, filter: {type: 'string'},stateId: 'StateGridDynamicDetails2',
                 hidden: true
             },
