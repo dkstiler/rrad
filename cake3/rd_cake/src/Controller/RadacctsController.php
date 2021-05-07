@@ -563,7 +563,9 @@ class RadacctsController extends AppController {
                     ['text'  => __('5 minutes'),       'itemId'    => 'mnuRefresh5m', 'group' => 'refresh', 'checked' => false ],
                     ['text'  => __('Stop auto reload'),'itemId'    => 'mnuRefreshCancel', 'group' => 'refresh', 'checked' => true ]
                 ]]]);
-
+                
+            array_push($action_group, ['xtype' => 'tbseparator']);
+            
             array_push($action_group, [
                 'xtype'         => 'button', 
                 'glyph'         => Configure::read('icnWatch'),      
@@ -573,6 +575,19 @@ class RadacctsController extends AppController {
                 'pressed'       => false,  
                 'ui'            => 'button-green',  
                 'tooltip'       => __('Show only currently connected')
+            ]);
+            
+            array_push($action_group, ['xtype' => 'tbseparator']);
+            array_push($action_group, [
+                'xtype'         => 'cmbTimezones', 
+                'width'         => 300, 
+                'itemId'        => 'cmbTimezone',
+                'name'          => 'timezone_id', 
+                'labelClsExtra' => 'lblRdReq',
+                'labelWidth'    => 75, 
+                'padding'       => '7 0 0 0',
+                'margin'        => 0,
+                'value'         => $timezone_id
             ]);
 
 
