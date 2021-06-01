@@ -86,7 +86,7 @@ Ext.define('Rd.controller.cProfileSimple', {
         var pnl     = button.up('pnlAddEditProfile');
         var multi   = pnl.down('#chkMultiple');
         
-        //Get the value is the user_id 
+        //Get the value of the user_id 
         var user_id = form.down('#hiddenUser').getValue();
         if(user_id == -1){
             Ext.ux.Toaster.msg(

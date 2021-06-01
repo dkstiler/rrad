@@ -388,7 +388,21 @@ class GridButtonsComponent extends Component {
             $b  = $this->_fetchBasic();
             $d  = $this->_fetchDocument();
             $a  = $this->_fetchApExtras();
-            $menu = array($b,$d,$a);
+            $n  = [
+                'xtype'     => 'buttongroup',
+                'width'     => 150,
+                'items'     => [
+                    [
+                    'xtype'     => 'tbtext', 
+                    'html'      => [
+                        '<div style="padding:2px;">',
+                        '<div class="txtBlue" style="text-align: center;">Drag-And-Drop</div>',
+                        '<div class="txtGreen" style="margin:3px; text-align: center;"><font size="4"><b><i class="fa fa-hand-o-down"></i> THE TREE</b></font></div>',
+                        '</div>'
+                    ]
+                ]
+            ]]; 
+            $menu = [$b,$d,$a,$n];
         }
         
         if($type == 'realms'){

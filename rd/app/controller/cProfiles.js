@@ -150,8 +150,8 @@ Ext.define('Rd.controller.cProfiles', {
                 var jsonData    = Ext.JSON.decode(response.responseText);
                 if(jsonData.success){
                     
-                    var hide_owner = true;
-                    var user_id  = -1;    
+                    var hide_owner  = true;
+                    var user_id     = 0; //Zero means the logged in user (and we hide the pick owner thing)  
                     if(jsonData.items.tree == true){
                         hide_owner = false;
                         user_id = -1;
@@ -317,8 +317,8 @@ Ext.define('Rd.controller.cProfiles', {
                     var jsonData    = Ext.JSON.decode(response.responseText);
                     if(jsonData.success){
                         
-                        var hide_owner = true;
-                        var user_id  = -1;    
+                        var hide_owner  = true;
+                        var user_id     = 0; //Zero means the logged in user (and we hide the pick owner thing)    
                         if(jsonData.items.tree == true){
                             hide_owner = false;
                             user_id = -1;
