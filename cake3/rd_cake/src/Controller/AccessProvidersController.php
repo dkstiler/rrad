@@ -534,6 +534,7 @@ class AccessProvidersController extends AppController{
                 $language           = $q_r->country_id.'_'.$q_r->language_id;
                 $items['language']  = $language;
                 $items['timezone_id']  = $q_r->timezone_id;
+                $items['api_key']   = $q_r->token;
 				
 				$sel_comp   = $this->_getSelectedComponents($this->request->query['ap_id']);
 				$items      = array_merge($items, $sel_comp);

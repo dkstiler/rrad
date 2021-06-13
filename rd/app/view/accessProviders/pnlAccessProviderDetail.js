@@ -46,7 +46,7 @@ Ext.define('Rd.view.accessProviders.pnlAccessProviderDetail', {
                                     anchor  : '100%'
                                 },
                                 autoScroll:true,
-                                items: [
+                                items: [                                    
                                     {
                                         itemId      : 'owner',
                                         xtype       : 'displayfield',
@@ -56,11 +56,18 @@ Ext.define('Rd.view.accessProviders.pnlAccessProviderDetail', {
                                         labelClsExtra: 'lblRdReq'
                                     },
                                     {
-                                        xtype   : 'textfield',
-                                        name    : "id",
-                                        hidden  : true,
-                                        value   : me.ap_id,
-                                        itemId  : 'ap_id'
+                                        xtype       : 'displayfield',
+                                        fieldLabel  : 'API Key',
+                                        name        : 'api_key',
+                                        value       : me.api_key,
+                                        labelClsExtra: 'lblRdReq'
+                                    },
+                                    {
+                                        xtype       : 'textfield',
+                                        name        : "id",
+                                        hidden      : true,
+                                        value       : me.ap_id,
+                                        itemId      : 'ap_id'
                                     },
                                     {
                                         xtype       : 'textfield',
