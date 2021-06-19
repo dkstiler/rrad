@@ -28,7 +28,6 @@ class FossilDriver extends VcsDriver
     protected $rootIdentifier;
     protected $repoFile;
     protected $checkoutDir;
-    protected $infoCache = array();
 
     /**
      * {@inheritDoc}
@@ -95,13 +94,13 @@ class FossilDriver extends VcsDriver
 
             $fs->ensureDirectoryExists($this->checkoutDir);
 
-            if (0 !== $this->process->execute(sprintf('fossil clone %s %s', ProcessExecutor::escape($this->url), ProcessExecutor::escape($this->repoFile)), $output)) {
+            if (0 !== $this->process->execute(sprintf('fossil clone -- %s %s', ProcessExecutor::escape($this->url), ProcessExecutor::escape($this->repoFile)), $output)) {
                 $output = $this->process->getErrorOutput();
 
                 throw new \RuntimeException('Failed to clone '.$this->url.' to repository ' . $this->repoFile . "\n\n" .$output);
             }
 
-            if (0 !== $this->process->execute(sprintf('fossil open %s --nested', ProcessExecutor::escape($this->repoFile)), $output, $this->checkoutDir)) {
+            if (0 !== $this->process->execute(sprintf('fossil open --nested -- %s', ProcessExecutor::escape($this->repoFile)), $output, $this->checkoutDir)) {
                 $output = $this->process->getErrorOutput();
 
                 throw new \RuntimeException('Failed to open repository '.$this->repoFile.' in ' . $this->checkoutDir . "\n\n" .$output);
@@ -150,7 +149,7 @@ class FossilDriver extends VcsDriver
      */
     public function getFileContent($file, $identifier)
     {
-        $command = sprintf('fossil cat -r %s %s', ProcessExecutor::escape($identifier), ProcessExecutor::escape($file));
+        $command = sprintf('fossil cat -r %s -- %s', ProcessExecutor::escape($identifier), ProcessExecutor::escape($file));
         $this->process->execute($command, $content, $this->checkoutDir);
 
         if (!trim($content)) {
@@ -166,7 +165,7 @@ class FossilDriver extends VcsDriver
     public function getChangeDate($identifier)
     {
         $this->process->execute('fossil finfo -b -n 1 composer.json', $output, $this->checkoutDir);
-        list($ckout, $date, $message) = explode(' ', trim($output), 3);
+        list(, $date) = explode(' ', trim($output), 3);
 
         return new \DateTime($date, new \DateTimeZone('UTC'));
     }
@@ -197,7 +196,6 @@ class FossilDriver extends VcsDriver
     {
         if (null === $this->branches) {
             $branches = array();
-            $bookmarks = array();
 
             $this->process->execute('fossil branch list', $output, $this->checkoutDir);
             foreach ($this->process->splitLines($output) as $branch) {
