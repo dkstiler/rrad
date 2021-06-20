@@ -17,9 +17,9 @@ class RegisterUsersController extends AppController {
         $this->loadComponent('CommonQuery');
         $this->loadComponent('Aa');
         $this->loadComponent('GridButtons');
-
         $this->loadComponent('JsonErrors');
         $this->loadComponent('TimeCalculations');
+        $this->loadComponent('MailTransport');
     }
 
 
@@ -220,32 +220,39 @@ class RegisterUsersController extends AppController {
 		        '_serialize' => ['success','data']
 		    ]);
 	}
-	
-	
-	private function _email_lost_password($username,$password){
-        $email_server = Configure::read('EmailServer');
-        $Email = new Email();
-        $Email->setProfile($email_server);
-        $Email->setSubject('Lost Password Retrieval');
-        $Email->setTo($this->request->getData('email'));
-        $Email->setViewVars(compact( 'username', 'password'));
-        $Email->setTemplate('user_detail', 'user_notify');
-        $Email->setEmailFormat('html');
-        $Email->send();
+		
+	private function _email_lost_password($username,$password){	
+	    $from       = $this->MailTransport->setTransport(-1);           
+        $success    = false;            
+        if($from !== false){         
+            $email = new Email(['transport'   => 'mail_rd']);
+            $email->setFrom($from);
+            $email->setSubject('Lost Password Retrieval');
+            $email->setTo($this->request->getData('email'));
+            $email->setViewVars(compact( 'username', 'password'));
+            $email->setTemplate('user_detail', 'user_notify');
+            $email->setEmailFormat('html');
+            $email->send();
+            $success  = true;
+        }	
+	    return $success;   
 	}
 
-
 	private function _email_user_detail($username,$password){
-
-		$email_server = Configure::read('EmailServer');
-        $Email = new Email();
-        $Email->setProfile($email_server);
-        $Email->setSubject('New user registration');
-        $Email->setTo($this->request->getData('username'));
-        $Email->setViewVars(compact( 'username', 'password'));
-        $Email->setTemplate('user_detail', 'user_notify');
-        $Email->setEmailFormat('html');
-        $Email->send();
+        $from       = $this->MailTransport->setTransport(-1);           
+        $success    = false;            
+        if($from !== false){       
+		    $email = new Email(['transport'   => 'mail_rd']);
+            $email->setFrom($from);
+            $email->setSubject('New user registration');
+            $email->setTo($this->request->getData('username'));
+            $email->setViewVars(compact( 'username', 'password'));
+            $email->setTemplate('user_detail', 'user_notify');
+            $email->setEmailFormat('html');
+            $email->send();
+            $success  = true;
+        }
+        return $success;
     }
 
     private function _create_permanent_user($url, $postData){

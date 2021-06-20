@@ -2,14 +2,12 @@
 
 namespace App\Controller;
 use App\Controller\AppController;
-
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-
 use Cake\Utility\Inflector;
 use Cake\ORM\TableRegistry;
-
 use Cake\Mailer\Email;
+
 
 class VouchersController extends AppController{
   
@@ -32,8 +30,8 @@ class VouchersController extends AppController{
         ]);  
         $this->loadComponent('JsonErrors'); 
         $this->loadComponent('VoucherGenerator'); 
-        $this->loadComponent('TimeCalculations'); 
-        
+        $this->loadComponent('TimeCalculations');
+        $this->loadComponent('MailTransport');      
     }
 
     public function exportCsv(){
@@ -818,33 +816,46 @@ class VouchersController extends AppController{
         if(!$user){
             return;
         }
-        $to     = $this->request->data['email'];
-        $message= $this->request->data['message'];
-
-        $entity = $this->{$this->main_model}->get($this->request->data['id']);
+        $data   = $this->request->getData();
+        $to     = $data['email'];
+        $message= $data['message'];    
+        
+        $entity = $this->{$this->main_model}->get($data['id']);
         if($entity){
-
             $username       = $entity->name;
             $password       = $entity->password;
             $valid_for      = $entity->time_valid;
             $profile        = $entity->profile;
             $extra_name     = $entity->extra_name;
             $extra_value    = $entity->extra_value;
-
-            $email_server   = Configure::read('EmailServer'); //FIXME!!!
-            $email          = new Email($email_server);
-            $email->subject('Your voucher detail')
-                ->to($to)
-                ->viewVars(compact( 'username', 'password','valid_for','profile','extra_name','extra_value','message'))
-                ->template('voucher_detail', 'voucher_notify')
-                ->emailFormat('html')
-                ->send();
+                 
+            $from           = $this->MailTransport->setTransport($user);           
+            $success        = false;
+                      
+            if($from !== false){         
+                $email      = new Email(['transport'   => 'mail_rd']);
+                $email->subject('Your voucher detail')
+                    ->from($from)
+                    ->to($to)
+                    ->viewVars(compact( 'username', 'password','valid_for','profile','extra_name','extra_value','message'))
+                    ->template('voucher_detail', 'voucher_notify')
+                    ->emailFormat('html')
+                    ->send();
+                $success    = true;
+                $this->set([
+                    'data'          => $data,
+                    'success'       => $success,
+                    '_serialize'    => ['data','success']
+                ]); 
+            }else{                     
+                $this->set([
+                    'data'          => $data,
+                    'success'       => $success,
+                    'message'       => 'Email Disabled / Not Configured',
+                    '_serialize'    => ['data','success','message']
+                ]);
+            }            
         }
-
-        $this->set(array(
-            'success' => true,
-            '_serialize' => array('success')
-        ));
     }
 
     public function pdfExportSettings(){
