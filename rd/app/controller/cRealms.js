@@ -158,8 +158,7 @@ Ext.define('Rd.controller.cRealms', {
         me.selectedRecord = record;
         //Dynamically update the top toolbar
         tb = me.getGrid().down('toolbar[dock=top]');
-
-        var edit = record.ge('update');
+        var edit = record.get('update');
         if(edit == true){
             if(tb.down('#edit') != null){
                 tb.down('#edit').setDisabled(false);
@@ -654,7 +653,8 @@ Ext.define('Rd.controller.cRealms', {
     tabDetailActivate : function(tab){
         var me      = this;
         var form    = tab.down('form');
-        var realm_id= tab.realm_id;       
+        var realm_id= tab.realm_id; 
+        console.log("tabDetailActivate");      
         form.load({
             url     : me.getUrlViewRealmDetail(), 
             method  : 'GET',

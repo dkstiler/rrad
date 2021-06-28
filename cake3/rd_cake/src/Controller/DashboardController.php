@@ -1007,10 +1007,11 @@ class DashboardController extends AppController{
         if(count($admin_items) > 0){
             array_push($tabs, array(
                     "$show"   => __('Admin'),
+                    'glyph'   => Configure::read('icnAdmin'),
                     'plain'   => $this->plain,
                     'ui'      => $this->ui,
-                    'glyph'   => Configure::read('icnAdmin'),
                     'xtype'   => 'tabpanel',
+                    'itemId'  => 'tabAdmin',
                     'layout'  => 'fit',
                     'items'   => $admin_items
                 )
@@ -1070,6 +1071,7 @@ class DashboardController extends AppController{
                     'xtype'   => 'tabpanel',
                     'glyph'   => Configure::read('icnUser'),
                     'layout'  => 'fit',
+                    'itemId'  => 'tabUsers',
                     'items'   => $users_items
                 )
             );
