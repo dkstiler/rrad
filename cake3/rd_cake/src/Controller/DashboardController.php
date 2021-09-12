@@ -641,7 +641,16 @@ class DashboardController extends AppController{
                         'tabConfig'=> [
                             'ui' => $this->tabUIThree
                         ]
-                    ]                    
+                    ],
+                    [
+                        'title'     => __('Top-Ups'),
+                        'glyph'     => Configure::read('icnTopUp'),
+                        'id'        => 'cTopUps',
+                        'layout'    => 'fit',
+                        'tabConfig'=> [
+                            'ui' => $this->tabUIThree
+                        ]
+                    ]                      
                 ]
             ]
         );
@@ -1060,6 +1069,16 @@ class DashboardController extends AppController{
                     ]
                 ]
             );
+        }
+        
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."TopUps/index")){
+            array_push($users_items, array(
+                    'title'     => __('Top-Ups'),
+                    'glyph'     => Configure::read('icnTopUp'),
+                    'id'        => 'cTopUps',
+                    'layout'    => 'fit'
+                )
+            ); 
         }
         
         

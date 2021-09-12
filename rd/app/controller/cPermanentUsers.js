@@ -38,7 +38,7 @@ Ext.define('Rd.controller.cPermanentUsers', {
        	'components.cmbRealm',   'components.cmbProfile',  'components.cmbCap',
        	'components.winNote',    'components.winNoteAdd',  'components.winCsvColumnSelect',
        	'permanentUsers.pnlPermanentUser', 'permanentUsers.gridUserRadaccts', 'permanentUsers.gridUserRadpostauths',
-        'permanentUsers.winPermanentUserPassword',  'components.winEnableDisable', 'permanentUsers.gridUserPrivate',
+        'components.winEnableDisable', 'permanentUsers.gridUserPrivate',
        	'components.cmbVendor',   'components.cmbAttribute', 'permanentUsers.gridUserDevices', 'components.pnlUsageGraph',
 		'components.cmbSsid',
         'permanentUsers.pnlPermanentUserGraphs'
@@ -237,9 +237,6 @@ Ext.define('Rd.controller.cPermanentUsers', {
             },
             '#winEnableDisablePermanentUser #save': {
                 click: me.enableDisableSubmit
-            },
-            'winPermanentUserPassword #save': {
-                click: me.changePasswordSubmit
             },
             'gridUserPrivate' : {
                 beforeedit:     me.onBeforeEditUserPrivate
@@ -873,53 +870,9 @@ Ext.define('Rd.controller.cPermanentUsers', {
                 var sr          = me.getGrid().getSelectionModel().getLastSelected();
                 var item_id     = sr.getId();
                 var username    = sr.get('username');
-                me.application.runAction('cPassword','Index',{id:item_id, username : username});
-            /*
-
-                //Determine the selected record:
-                var sr = me.getGrid().getSelectionModel().getLastSelected(); 
-                if(!Ext.WindowManager.get('winPermanentUsersPassword'+sr.getId())){
-                    var w = Ext.widget('winPermanentUserPassword',
-                        {
-                            id          : 'winPermanentUsersPassword'+sr.getId(),
-                            user_id     : sr.getId(),
-                            username    : sr.get('username'),
-                            title       : i18n('sChange_password_for')+' '+sr.get('username')
-                        });
-                    w.show();      
-                }
-                
-            */      
-                
+                me.application.runAction('cPassword','Index',{id:item_id, username : username});                  
             }    
         }
-    },
-    changePasswordSubmit: function(button){
-        var me      = this;
-        var win     = button.up('window');
-        var form    = win.down('form');
-
-        var extra_params        = {};
-        var sr                  = me.getGrid().getSelectionModel().getLastSelected();
-        extra_params['user_id'] = sr.getId();
-
-        //Checks passed fine...      
-        form.submit({
-            clientValidation    : true,
-            url                 : me.getUrlChangePassword(),
-            params              : extra_params,
-            success             : function(form, action) {
-                win.close();
-                me.reload();
-                Ext.ux.Toaster.msg(
-                    i18n('sPassword_changed'),
-                    i18n('sPassword_changed_fine'),
-                    Ext.ux.Constants.clsInfo,
-                    Ext.ux.Constants.msgInfo
-                );
-            },
-            failure             : Ext.ux.formFail
-        });
     },
     enableDisable: function(){
         var me      = this;

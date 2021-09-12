@@ -87,19 +87,32 @@ var rdDynamic = (function () {
                         fDebug(cDynamicData);
                         buildGuiBasedOnData();
                     }else{
+                    
+                        var item_string = "<b>- AVAILABLE -</b><br>\n";
+                        var stripe =false;
+                        Object.keys(data.json().data).forEach(key => {
+                            console.log(key, data.json().data[key]);
+                            if(stripe){
+                                item_string = item_string + '<div style="background:#d2d4d4;font-size:12px;">'+key+' <span style="color:blue;">'+data.json().data[key]+"</span></div>\n";
+                            }else{
+                                item_string = item_string + '<div style="font-size:12px;">'+key+' <span style="color:blue;">'+data.json().data[key]+"</span></div>\n";
+                            }
+                            stripe = ! stripe;
+                        });
+                                           
                         webix.alert({
                             title: i18n("sHuston_we_have_a_problem"),
                             text: i18n('sGo_to_RADIUSdesk_cm_open_the_b_Dynamic Login Pages_b_applet_fs')+"<br>"+
                             i18n('sSelect_an_entry_and_b_edit_b_it_fs')+"<br>"+
-                            i18n('sMake_sure_you_added_an_identifier_from_this_URL_s_query_string_under_b_Dynamic_Keys_b_to_ensure_proper_working_of_this_login_page')+"<br>",
+                            i18n('sMake_sure_you_added_an_identifier_from_this_URL_s_query_string_under_b_Dynamic_Keys_b_to_ensure_proper_working_of_this_login_page')+"<br>"+
+                            item_string,
                             type:"confirm-error"
                         });
                     }
                 }
             });
         };
-        
-        
+               
         var buildGuiBasedOnData = function(){
             fDebug("Building GUI");
                               
@@ -339,8 +352,7 @@ var rdDynamic = (function () {
         var guiConnect  = function(){
     
             //Username and or Voucher
-            var voucher_user = []; //Default is to have the voucher;
-        
+            var voucher_user = []; //Default is to have the voucher;       
             if(
                 (cDynamicData.settings.voucher_login_check == true)&&
                 (cDynamicData.settings.user_login_check == true)){
@@ -361,13 +373,15 @@ var rdDynamic = (function () {
                             cells   :[
                                 {
                                     id:"userView",
+                                    animate :false,
                                     rows:[
                                         { view:"text", label:i18n("sUsername"), name: "username",id:'Username'},
                                         { view:"text", type:"password", name: "password",label:i18n("sPassword"),id:"Password"}
                                     ]
                                 },
                                 {
-                                    id  :"voucherView", 
+                                    id  :"voucherView",
+                                    animate :false,
                                     rows:[
                                         { view:"text", label:i18n("sVoucher"), name: "voucher",id:'voucher'}
                                     ]
@@ -519,12 +533,9 @@ var rdDynamic = (function () {
                     });
                 }
                 
-                
                 var con_insides  = voucher_user.concat(b);
             };
-                 
-            //-----
-            
+                        
             var sTabBarOptions  = [{ value: "<span class='webix_icon mdi mdi-heart-pulse'></span>"+i18n('sSession'), id: 'sessionView' }];
             var sTabBarCells    = [
                 {

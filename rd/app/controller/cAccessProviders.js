@@ -19,7 +19,7 @@ Ext.define('Rd.controller.cAccessProviders', {
         'accessProviders.treeApUserRights',     'accessProviders.gridRealms',   
         'accessProviders.gridAccessProviders',  'accessProviders.winApAddWizard',
         'components.winCsvColumnSelect',        'components.winNote',                   'components.winNoteAdd',
-        'permanentUsers.winPermanentUserPassword','components.winEnableDisable',        'components.vCmbLanguages',
+        'accessProviders.winAccessProviderPassword','components.winEnableDisable',        'components.vCmbLanguages',
         'accessProviders.treeAccessProviders'
     ],
     stores: ['sLanguages',  'sApRights',    'sAccessProvidersGrid',     'sAccessProvidersTree',
@@ -147,16 +147,13 @@ Ext.define('Rd.controller.cAccessProviders', {
                 //beforerender:   me.tabDetailActivate,//No need for this one 
                 activate:       me.tabDetailActivate
             },
-            'pnlAccessProvider #tabDetail #btnPickGroup' : {
-                click: me.btnPickGroupClick
-            },
             'pnlAccessProvider #tabRealms': {
                 activate:       me.tabRealmsActivate
             },
             'pnlAccessProvider #tabRights': {
                 activate:       me.tabRightsActivate
             },
-            'winPermanentUserPassword #save': {
+            'winAccessProviderPassword #save': {
                 click: me.changePasswordSubmit
             },
             '#winEnableDisableUser #save': {
@@ -386,7 +383,7 @@ Ext.define('Rd.controller.cAccessProviders', {
                     return;
                 }
 
-                var ap_tab_name = sr.get('username');
+               var ap_tab_name = sr.get('username');
               
                 tp.add({ 
                     title :     ap_tab_name,
@@ -401,7 +398,7 @@ Ext.define('Rd.controller.cAccessProviders', {
                     }
                 });
                 tp.setActiveTab(ap_tab_id); //Set focus on Add Tab
-                                    
+                
             });
         }
     },
@@ -819,17 +816,21 @@ Ext.define('Rd.controller.cAccessProviders', {
                 //We're hiding those elements the Access Provider does not have rights to
                 Ext.Array.forEach(Object.keys(b.result.metaData),function(item){
                     if(b.result.metaData[item] == true){
-                        form.down('#'+item).setDisabled(false);
-                        form.down('#'+item).setHidden(false);
+                        if(form.down('#'+item)){
+                            form.down('#'+item).setDisabled(false);
+                            form.down('#'+item).setHidden(false);
+                        }
                     }else{
-                        form.down('#'+item).setDisabled(true);
-                        form.down('#'+item).setHidden(true);                    
+                        if(form.down('#'+item)){
+                            form.down('#'+item).setDisabled(true);
+                            form.down('#'+item).setHidden(true);
+                        }                    
                     }
                 });
                 
                 //Treetags
                 if(b.result.data.enable_grouping == true){
-                    form.down('#fcPickGroup').show();
+                    //form.down('#fcPickGroup').show(); --11Jun 2021 remove it for now
                 }else{
                     form.down('#fcPickGroup').hide();
                 }     
@@ -859,10 +860,10 @@ Ext.define('Rd.controller.cAccessProviders', {
 
                 //Determine the selected record:
                 var sr = me.getTree().getSelectionModel().getLastSelected(); 
-                if(!Ext.WindowManager.get('winPermanentUsersPassword'+sr.getId())){
-                    var w = Ext.widget('winPermanentUserPassword',
+                if(!Ext.WindowManager.get('winAccessProviderPassword'+sr.getId())){
+                    var w = Ext.widget('winAccessProviderPassword',
                         {
-                            id          : 'winPermanentUsersPassword'+sr.getId(),
+                            id          : 'winAccessProviderPassword'+sr.getId(),
                             user_id     : sr.getId(),
                             username    : sr.get('username'),
                             title       : i18n('sChange_password_for')+' '+sr.get('username')

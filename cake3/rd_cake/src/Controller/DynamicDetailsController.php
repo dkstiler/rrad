@@ -42,7 +42,7 @@ class DynamicDetailsController extends AppController{
         $this->loadModel('DynamicPhotos');
         $this->loadModel('DynamicPages');
         $this->loadModel('DynamicDetailSocialLogins');
-        $this->loadModel('DynamicDetailPrelogins');
+
         
         $this->loadComponent('Aa');
         $this->loadComponent('GridButtons');
@@ -57,61 +57,7 @@ class DynamicDetailsController extends AppController{
             'condition' => 'dynamic_detail_id'
         ]);
     }
-    
-    public function wipPrelogin(){
-        $redir_to = "http://www.radiusdesk.com";
-        if($this->getRequest()->getSession()->read('prelogin_completed') == '1'){
-            $redir_to = "http://www.ubuntu.com";
-        }
-        
-        $prelogin_mac = $this->request->getCookie('prelogin_mac');
-        print_r($this->Cookie->read('prelogin_mac'));
-        
-       // $this->response->header('Location', $redir_to);
-      //  return $this->response;   
-    }
-    
-    public function wipPreloginReturn(){
-        //$session = $this->getRequest()->getSession();
-        //$session->write('prelogin_completed', '1');
-        
-        $this->Cookie->write('prelogin_mac','AA-BB-CC-DD-EE-FF');
-        $this->Cookie->write('prelogin_dynamic_detail_id',5);
-        return $this->response;
-
-        
-        //$this->response->header('Location', '/cake3/rd_cake/dynamic-details/wip-prelogin.json');
-        //$this->response->header('Location', 'http://1.0.0.0');
-    }
-    
-    public function thankYou(){
-        /*  
-        $session    = $this->getRequest()->getSession();
-        $mac        = $session->read('prelogin_mac');
-        $dd_id      = $session->read('prelogin_dynamic_detail_id');
-        */
-        //We try using Cookies
-        $mac        = $this->Cookie->read('prelogin_mac');
-        $dd_id      = $this->Cookie->read('prelogin_dynamic_detail_id');
-        
-        $e = $this->{'DynamicDetailPrelogins'}->find()->where([
-            'DynamicDetailPrelogins.mac' => $mac,
-            'DynamicDetailPrelogins.dynamic_detail_id' => $dd_id
-        ])->first();
-        if($e){
-            $this->{'DynamicDetailPrelogins'}->patchEntity($e,['completed' => true]);
-            $this->{'DynamicDetailPrelogins'}->save($e);
-            /*
-            $session->delete('prelogin_mac');
-            $session->delete('prelogin_dynamic_detail_id');
-            */
-            //We try using Cookies
-            $this->Cookie->delete('prelogin_mac');
-            $this->Cookie->delete('prelogin_dynamic_detail_id');
-            $this->response->header('Location', 'http://1.0.0.0');
-        }  
-    }
-        
+       
     public function infoFor(){
 
         $items      = array();
@@ -247,8 +193,7 @@ class DynamicDetailsController extends AppController{
 			'register_users',       'lost_password',
 			'slideshow_enforce_watching',
 			'slideshow_enforce_seconds',
-			'available_languages',
-			'prelogin_check'
+			'available_languages'
 		);
         
 		//print_r($q_r);
@@ -321,14 +266,28 @@ class DynamicDetailsController extends AppController{
 
         $success = true;
         if(count($items) == 0){ //Not found
-            $success = false;
+            $success    = false;
+            $key_val    = [];
+            $q_string   = $this->request->getQuery();
+            foreach(array_keys($q_string) as $key){
+                $key_val[$key] = $q_string[$key];
+            }
+            $items      = $key_val;          
         }
-
-        $this->set(array(
+        
+        $client_info                = []; 
+        $client_info['userAgent']   = $this->request->header('User-Agent');    
+        $client_info['isMobile']    = $this->request->is('mobile');
+        $client_info['isAndroid']   = stripos($this->request->header('User-Agent'), 'Android');
+        $client_info['isIPhone']    = stripos($this->request->header('User-Agent'), 'iPhone');
+        $client_info['isIPad']      = stripos($this->request->header('User-Agent'), 'iPad');  
+        $items['client_info']       = $client_info;
+        
+        $this->set([
             'data' => $items,
             'success' => $success,
-            '_serialize' => array('data','success')
-        ));
+            '_serialize' => ['data','success']
+        ]);
     }
     
     public function idMe(){
@@ -707,8 +666,7 @@ class DynamicDetailsController extends AppController{
             'auto_suffix_check',
             'usage_show_check',
             'lost_password',
-            'slideshow_enforce_watching',
-            'prelogin_check'
+            'slideshow_enforce_watching'
 	    );
 	    
         foreach($check_items as $i){
@@ -1767,57 +1725,6 @@ class DynamicDetailsController extends AppController{
        	    ->where($conditions)
        	    ->order(['DynamicPairs.priority' => 'DESC'])
        	    ->first();
-       	
-       	//=== PRELOGIN ===    
-        if($q_r->dynamic_detail->prelogin_check){
-            //Check if MAC and dynamic_etail combo has been recorded
-            $mac    = $this->request->query['mac'];
-            $dd_id  = $q_r->dynamic_detail->id;
-            $nasid  = $this->request->query['nasid'];
-            /*
-            $session = $this->getRequest()->getSession();
-            $session->write('prelogin_mac', $mac);
-            $session->write('prelogin_dynamic_detail_id', $dd_id);
-            */
-            //We try using Cookies
-            $this->Cookie->write('prelogin_mac',$mac);
-            $this->Cookie->write('prelogin_dynamic_detail_id',$dd_id);
-            
-            $e = $this->{'DynamicDetailPrelogins'}->find()
-                ->where([
-                    'DynamicDetailPrelogins.mac'               => $mac,
-                    'DynamicDetailPrelogins.dynamic_detail_id' => $dd_id
-                ])
-                ->first();
-            if($e){
-                //Compare with when the follow_up must be done
-
-                if($e->completed == true){
-                    if($q_r->dynamic_detail->prelogin_expire != 0){ //Only values other than NEVER expire
-                        $last_done  = new FrozenTime($e->modified);
-                        $days_valid = $q_r->dynamic_detail->prelogin_expire;
-                        $expire     = $last_done->addhour(($days_valid * 24)); 
-                        $now        = FrozenTime::now();
-                        if($now >= $expire){
-                            $this->{'DynamicDetailPrelogins'}->patchEntity($e,['completed' => false]);
-                            $this->{'DynamicDetailPrelogins'}->touch($e);
-                            $this->{'DynamicDetailPrelogins'}->save($e);
-                            return $q_r->dynamic_detail->prelogin_url; 
-                        }
-                    } 
-                }else{
-                    //Just update it before sending them off again
-                    $this->{'DynamicDetailPrelogins'}->touch($e);
-                    $this->{'DynamicDetailPrelogins'}->save($e);
-                    return $q_r->dynamic_detail->prelogin_url; 
-                }
-            }else{
-               $e = $this->{'DynamicDetailPrelogins'}->newEntity(['dynamic_detail_id' =>$dd_id,'mac' => $mac,'nasid' => $nasid]);
-               $this->{'DynamicDetailPrelogins'}->save($e);
-               return $q_r->dynamic_detail->prelogin_url; 
-            }
-        }
-        //=== END PRELOGIN ===
       	
 		//See which Theme are selected
 		$theme          = 'Default';
