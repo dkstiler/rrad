@@ -229,7 +229,10 @@ class PermanentUsersController extends AppController{
        */
         
         //---Get the language and country---
-        $country_language                   = explode( '_', $this->request->data['language'] );
+        $country_language                   = Configure::read('language.default');
+        if($this->request->getData('language')){
+            $country_language               = explode( '_', $this->request->getData('language'));
+        }
         $country                            = $country_language[0];
         $language                           = $country_language[1];
         $this->request->data['language_id'] = $language;
@@ -283,9 +286,14 @@ class PermanentUsersController extends AppController{
             }  
         }
         
-        $check_items = array(
+        $check_items = [
 			'active'
-		);
+		];
+		
+		//Default for account active if not in POST data
+		if(!$this->request->getData('active')){
+		    $this->request->data['active'] = 1;
+		}
 
         foreach($check_items as $i){
             if(isset($this->request->data[$i])){
@@ -301,7 +309,8 @@ class PermanentUsersController extends AppController{
         if($this->{$this->main_model}->save($entity)){
             $this->set(array(
                 'success' => true,
-                '_serialize' => array('success')
+                'data'    => $this->request->data(),
+                '_serialize' => ['success','data']
             ));
         }else{
             $message = __('Could not create item');
