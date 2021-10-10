@@ -3,7 +3,8 @@ Ext.define('Rd.view.profiles.pnlSpeedLimit', {
     glyph       : Rd.config.icnSpeed,
     alias       : 'widget.pnlSpeedLimit',
     requires    : [
-        'Rd.view.profiles.vcSpeedLimit'
+        'Rd.view.profiles.vcSpeedLimit',
+        'Rd.view.components.rdSlider'
     ],
     controller  : 'vcSpeedLimit',
     layout      : { type: 'vbox'},
@@ -32,33 +33,10 @@ Ext.define('Rd.view.profiles.pnlSpeedLimit', {
 			    itemId      : 'cntDetail',
 			    items       : [
 			        {
-			            xtype       : 'container',
-                        layout      : 'hbox',
-                        width       : w_sec+15,
-                        items       : [
-                            {
-                                xtype       : 'displayfield',
-                                width       : 180,
-                                margin      : '15 0 0 15',
-                                padding     : 0,
-                                fieldLabel  : "<i class='fa fa-arrow-up'></i> Up Amount",
-                                value       : 1
-                            },
-                            {
-			                    xtype       : 'sliderfield',
-                                name        : 'speed_upload_amount',
-                                userCls     : 'sldrDark',
-                                itemId      : 'sldrSpeedUploadAmount',
-                                width       : 150,
-                                increment   : 1,
-                                minValue    : 1,
-                                maxValue    : 1023,
-                                listeners   : {
-					                change  : 'sldrSpeedUploadAmountChange'
-				                }
-                            }
-                        ]
-                    },
+			            xtype       : 'rdSlider',
+			            sliderName  : 'speed_upload_amount',
+			            fieldLabel  : "<i class='fa fa-arrow-up'></i> Up Amount"
+			        },
                     {
                         xtype       : 'radiogroup',
                         fieldLabel  : "<i class='fa fa-arrow-up'></i> Up Unit",
@@ -82,33 +60,10 @@ Ext.define('Rd.view.profiles.pnlSpeedLimit', {
                         ]
                     },
                     {
-			            xtype       : 'container',
-                        layout      : 'hbox',
-                        width       : w_sec+15,
-                        items       : [
-                            {
-                                xtype       : 'displayfield',
-                                width       : 180,
-                                margin      : '15 0 0 15',
-                                padding     : 0,
-                                fieldLabel  : "<i class='fa fa-arrow-down'></i> Down Amount",
-                                value       : 1
-                            },
-                            {
-			                    xtype       : 'sliderfield',
-                                name        : 'speed_download_amount',
-                                userCls     : 'sldrDark',
-                                itemId      : 'sldrSpeedDownloadAmount',
-                                width       : 150,
-                                increment   : 1,
-                                minValue    : 1,
-                                maxValue    : 1023,
-                                listeners   : {
-					                change  : 'sldrSpeedDownloadAmountChange'
-				                }
-                            }
-                        ]
-                    },
+			            xtype       : 'rdSlider',
+			            sliderName  : 'speed_download_amount',
+			            fieldLabel  : "<i class='fa fa-arrow-down'></i> Down Amount",
+			        },
                     {
                         xtype       : 'radiogroup',
                         fieldLabel  : "<i class='fa fa-arrow-down'></i> Down Unit",

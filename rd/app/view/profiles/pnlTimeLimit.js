@@ -3,7 +3,8 @@ Ext.define('Rd.view.profiles.pnlTimeLimit', {
     glyph       : Rd.config.icnTime,
     alias       : 'widget.pnlTimeLimit',
     requires    : [
-        'Rd.view.profiles.vcTimeLimit'
+        'Rd.view.profiles.vcTimeLimit',
+        'Rd.view.components.rdSlider'
     ],
     controller  : 'vcTimeLimit',
     layout      : { type: 'vbox'},
@@ -35,7 +36,8 @@ Ext.define('Rd.view.profiles.pnlTimeLimit', {
                         xtype       : 'radiogroup',
                         fieldLabel  : 'Reset',
                         itemId      : 'rgrpTimeReset',
-                        columns     : 2,
+                        width       : me.width,
+                        columns     : 3,
                         vertical    : false,
                         items       : [
                             {
@@ -55,44 +57,41 @@ Ext.define('Rd.view.profiles.pnlTimeLimit', {
                                 boxLabel  : 'Monthly',
                                 name      : 'time_reset',
                                 inputValue: 'monthly',
-                                margin    : '0 15 0 0'
+                                margin    : '0 0 0 15'
                             },
                             {
                                 boxLabel  : 'Never',
                                 name      : 'time_reset',
                                 inputValue: 'never',
-                                margin    : '0 0 0 15'   
-                            }
-                        ]
-                    },
-			        {
-			            xtype       : 'container',
-                        layout      : 'hbox',
-                        width       : w_sec+15,
-                        items       : [
-                            {
-                                xtype       : 'displayfield',
-                                width       : 180,
-                                margin      : '15 0 0 15',
-                                padding     : 0,
-                                fieldLabel  : 'Amount',
-                                value       : 1
+                                margin    : '0 15 0 0'   
                             },
                             {
-			                    xtype       : 'sliderfield',
-                                name        : 'time_amount',
-                                userCls     : 'sldrDark',
-                                itemId      : 'sldrTimeAmount',
-                                width       : 150,
-                                increment   : 1,
-                                minValue    : 1,
-                                maxValue    : 120,
-                                listeners   : {
-					                change  : 'sldrTimeAmountChange'
-				                }
+                                boxLabel  : 'Top-Up',
+                                name      : 'time_reset',
+                                inputValue: 'top_up',
+                                margin    : '0 0 0 15'   
                             }
-                        ]
+                        ],
+                        listeners   : {
+					        change  : 'rgrpTimeResetChange'
+				        }
                     },
+                    {
+                        xtype       : 'panel',
+                        itemId      : 'pnlTimeTopUp',
+                        hidden      : true,
+                        bodyStyle   : 'background: #fff1b3',
+                        html        : "<h3 style='text-align:center;color:#876f01'>Top-Up Amount is Per User</h3>",
+                        width       : me.width-30,
+                        margin      : 10
+                    },
+                    {
+			            xtype       : 'rdSlider',
+			            sliderName  : 'time_amount',
+			            fieldLabel  : "Amount",
+                        minValue    : 1,
+                        maxValue    : 120
+			        },
                     {
                         xtype       : 'radiogroup',
                         fieldLabel  : 'Units',
@@ -145,6 +144,7 @@ Ext.define('Rd.view.profiles.pnlTimeLimit', {
                     },
                     {
                         xtype       : 'checkbox',
+                        itemId      : 'chkTimeMac',
                         boxLabel    : 'Apply Limit Per Device (For Click-To-Connect)',
                         name        : 'time_limit_mac',
                         margin      : '0 0 0 15'

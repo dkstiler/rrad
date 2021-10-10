@@ -118,10 +118,14 @@ if($disconn_flag){
 #For accounting
 if($acct_flag){
 my $id=time()."_test";
+#@scenario_string = (
+#	"auth User-Name=$username User-Password=$password Called-Station-Id=$called_station Calling-Station-Id=$calling_station",
+#    "acct Acct-Status-Type=Start User-Name=$username Acct-Session-Id=$id Called-Station-Id=$called_station Calling-Station-Id=$calling_station",
+#    "acct Acct-Status-Type=Stop User-Name=$username Acct-Session-Time=10 Acct-Input-Octets=10 Acct-Output-Octets=10 Acct-Terminate-Cause=User-Request Acct-Session-Id=$id Called-Station-Id=$called_station Calling-Station-Id=$calling_station"
+#);
 @scenario_string = (
 	"auth User-Name=$username User-Password=$password Called-Station-Id=$called_station Calling-Station-Id=$calling_station",
-    "acct Acct-Status-Type=Start User-Name=$username Acct-Session-Id=$id Called-Station-Id=$called_station Calling-Station-Id=$calling_station",
-    "acct Acct-Status-Type=Stop User-Name=$username Acct-Session-Time=10 Acct-Input-Octets=10 Acct-Output-Octets=10 Acct-Terminate-Cause=User-Request Acct-Session-Id=$id Called-Station-Id=$called_station Calling-Station-Id=$calling_station"
+    "acct Acct-Status-Type=Start User-Name=$username Acct-Session-Id=$id Called-Station-Id=$called_station Calling-Station-Id=$calling_station"
 );
 }
 
@@ -150,6 +154,26 @@ my %packetname = (
     42 => "Disconnect-NAK"
 
     );
+
+my %packetcode = (
+	"Access-Request" => 1,
+	"Access-Accept" =>2,
+	"Access-Reject"=>3,
+	"Accounting-Request"=>4,
+	"Accounting-Response"=>5,
+	"Accounting-Status"=>6,
+	"Password-Request"=>7,
+	"Password-Accept"=>8,
+	"Password-Reject"=>9,
+	"Accounting-Message"=>10,
+	"Access-Challenge"=>11,
+	"Status-Server"=>12,
+	"Status-Client"=>13,
+    "Disconnect-Request"=>40,
+    "Disconnect-ACK"=>41,
+    "Disconnect-NAK"=>42
+);
+
 
 # check if scenario file is specified
 if (!$radclient) {
@@ -301,9 +325,10 @@ sub user_auth {
 	print "\nSending Access-Request to $host:$port ...\n";
 	my $return_code = 0;
 	my $cmd = "$radclient -r $auth_retry -t $auth_timeout $host:$port auth $secret";
+	#print("$cmd\n");
 	my $pid = open3 *CMD_IN, *CMD_OUT, *CMD_ERR, $cmd;
 	foreach (keys %attr) {
-		print "\t$_ = $attr{$_}\n";
+	#	print "\t$_ = $attr{$_}\n";
 		print CMD_IN "$_ = $attr{$_}\n";
 	}
 	close CMD_IN;
@@ -318,12 +343,13 @@ sub user_auth {
 			} else {
 				my $line = <CMD_OUT> || '';
 				chomp $line;
-				if ($line =~ /^Received response ID (\d+), code (\d+), length = (\d+)$/) {
-					my ($id, $code, $length) = ($1, $2, $3);
-					$return_code = $code;
-					print "Received " . $packetname{$code} . " packet (id=$id, length=$length)\n";
+				if ($line =~ /^Received (\w+-\w+)\s+Id\s+(\d+).+\s+length\s+(\d+)$/) {
+					my ($pckt,$id,$length) = ($1, $2, $3);
+					$return_code = $packetcode{$pckt};
+					print "$line\n";
+					#print "Received $pckt(" .$return_code. ") packet (id=$id, length=$length)\n";
 					$last_auth_id = $id;
-					$last_auth_code = $code;
+					$last_auth_code = $return_code;
 				} else {
 					if ($line) { print "$line\n"; }
 				}

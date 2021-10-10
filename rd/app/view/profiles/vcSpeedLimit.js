@@ -14,15 +14,5 @@ Ext.define('Rd.view.profiles.vcSpeedLimit', {
 		}else{
 		    cnt.show();
 		}
-	},
-	sldrSpeedDownloadAmountChange: function(sldr){
-        var me 		= this;
-		var fc    	= sldr.up('container');
-        fc.down('displayfield').setValue(sldr.getValue());
-    },
-	sldrSpeedUploadAmountChange: function(sldr){
-        var me 		= this;
-		var fc    	= sldr.up('container');
-        fc.down('displayfield').setValue(sldr.getValue());
-    } 
+	}
 });

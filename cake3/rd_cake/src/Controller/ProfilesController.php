@@ -157,7 +157,7 @@ class ProfilesController extends AppController
             }
 
             //Add the components (already from the highest priority
-            $components = array();
+            $components = [];
             $data_cap_in_profile = false; // A flag that will be set if the profile contains a component with Rd-Reset-Type-Data group check attribute.
             $time_cap_in_profile = false; // A flag that will be set if the profile contains a component with Rd-Reset-Type-Time group check attribute.
 
@@ -713,8 +713,21 @@ class ProfilesController extends AppController
         $this->{'Radgroupreplies'}->deleteAll(['groupname' => $groupname]);
         
         if($this->request->data['data_limit_enabled']){
+         
             //Reset
             $data_reset = $this->request->data['data_reset'];
+            $data_top_up    = false;
+            if($data_reset == 'top_up'){
+                $data_reset = 'never';
+                $data_top_up    = true;
+            }
+            
+            //Data Cap Type
+            $data_cap       = 'hard';
+            if($this->request->getData('data_cap')){
+                $data_cap = $this->request->getData('data_cap');
+            }
+            
             $d_reset = [
                 'groupname' => $groupname,
                 'attribute' => 'Rd-Reset-Type-Data',
@@ -725,25 +738,26 @@ class ProfilesController extends AppController
             $e_data_reset = $this->{'Radgroupchecks'}->newEntity($d_reset);
             $this->{'Radgroupchecks'}->save($e_data_reset);
             
-            //Data Amount
-            $data_amount    = $this->request->data['data_amount'];
-            $data_unit      = $this->request->data['data_unit'];
-            $data           = $data_amount * 1000 * 1000; //(Mega by default)
-            if($data_unit == 'gb'){
-                $data = $data * 1000; //Giga
+            if($data_top_up == false){
+                //Data Amount
+                $data_amount    = $this->request->data['data_amount'];
+                $data_unit      = $this->request->data['data_unit'];
+                $data           = $data_amount * 1024 * 1024; //(Mega by default)
+                if($data_unit == 'gb'){
+                    $data = $data * 1024; //Giga
+                }
+                $d_amount = [
+                    'groupname' => $groupname,
+                    'attribute' => 'Rd-Total-Data',
+                    'op'        => ':=',
+                    'value'     => $data,
+                    'comment'   => 'SimpleProfile'
+                ];
+                $e_data_amount = $this->{'Radgroupchecks'}->newEntity($d_amount);
+                $this->{'Radgroupchecks'}->save($e_data_amount);
             }
-            $d_amount = [
-                'groupname' => $groupname,
-                'attribute' => 'Rd-Total-Data',
-                'op'        => ':=',
-                'value'     => $data,
-                'comment'   => 'SimpleProfile'
-            ];
-            $e_data_amount = $this->{'Radgroupchecks'}->newEntity($d_amount);
-            $this->{'Radgroupchecks'}->save($e_data_amount);
             
             //Data Cap Type
-            $data_cap   = $this->request->data['data_cap'];
             $d_cap = [
                 'groupname' => $groupname,
                 'attribute' => 'Rd-Cap-Type-Data',
@@ -756,7 +770,6 @@ class ProfilesController extends AppController
             
             if($this->request->data['data_limit_mac']){
                 //Data Cap Type
-
                 $d_mac = [
                     'groupname' => $groupname,
                     'attribute' => 'Rd-Mac-Counter-Data',
@@ -770,8 +783,21 @@ class ProfilesController extends AppController
         }
         
         if($this->request->data['time_limit_enabled']){
+            
             //Reset
-            $time_reset = $this->request->data['time_reset'];
+            $time_reset     = $this->request->data['time_reset'];
+            $time_top_up    = false;
+            if($time_reset == 'top_up'){
+                $time_reset     = 'never';
+                $time_top_up    = true;
+            }
+            
+            //Time Cap Type
+            $time_cap       = 'hard';
+            if($this->request->getData('time_cap')){
+                $time_cap = $this->request->getData('time_cap');
+            }
+               
             $t_reset = [
                 'groupname' => $groupname,
                 'attribute' => 'Rd-Reset-Type-Time',
@@ -782,28 +808,29 @@ class ProfilesController extends AppController
             $e_time_reset = $this->{'Radgroupchecks'}->newEntity($t_reset);
             $this->{'Radgroupchecks'}->save($e_time_reset);
             
-            //Data Amount
-            $time_amount    = $this->request->data['time_amount'];
-            $time_unit      = $this->request->data['time_unit'];
-            $time           = $time_amount * 60; //(Seconds by default)
-            if($time_unit == 'hour'){
-                $time = $time * 60; //60 Minutes in an hour
+            if($time_top_up == false){
+                //Time Amount
+                $time_amount    = $this->request->data['time_amount'];
+                $time_unit      = $this->request->data['time_unit'];
+                $time           = $time_amount * 60; //(Seconds by default)
+                if($time_unit == 'hour'){
+                    $time = $time * 60; //60 Minutes in an hour
+                }
+                if($time_unit == 'day'){
+                    $time = $time * 60 * 24; //60 Minutes in an hour and 24 hours in a day
+                }
+                $t_amount = [
+                    'groupname' => $groupname,
+                    'attribute' => 'Rd-Total-Time',
+                    'op'        => ':=',
+                    'value'     => $time,
+                    'comment'   => 'SimpleProfile'
+                ];
+                $e_time_amount = $this->{'Radgroupchecks'}->newEntity($t_amount);
+                $this->{'Radgroupchecks'}->save($e_time_amount);
             }
-            if($time_unit == 'day'){
-                $time = $time * 60 * 24; //60 Minutes in an hour and 24 hours in a day
-            }
-            $t_amount = [
-                'groupname' => $groupname,
-                'attribute' => 'Rd-Total-Time',
-                'op'        => ':=',
-                'value'     => $time,
-                'comment'   => 'SimpleProfile'
-            ];
-            $e_time_amount = $this->{'Radgroupchecks'}->newEntity($t_amount);
-            $this->{'Radgroupchecks'}->save($e_time_amount);
             
-            //Time Cap Type
-            $time_cap   = $this->request->data['time_cap'];
+            
             $t_cap = [
                 'groupname' => $groupname,
                 'attribute' => 'Rd-Cap-Type-Time',
@@ -814,9 +841,8 @@ class ProfilesController extends AppController
             $e_time_cap = $this->{'Radgroupchecks'}->newEntity($t_cap);
             $this->{'Radgroupchecks'}->save($e_time_cap);
             
-            if($this->request->data['time_limit_mac']){
+            if($this->request->getData('time_limit_mac')){
                 //Data Cap Type
-
                 $t_mac = [
                     'groupname' => $groupname,
                     'attribute' => 'Rd-Mac-Counter-Time',
@@ -832,9 +858,9 @@ class ProfilesController extends AppController
         if($this->request->data['speed_limit_enabled']){ //IF it is there    
             $speed_upload_amount    = $this->request->data['speed_upload_amount'];
             $speed_upload_unit      = $this->request->data['speed_upload_unit'];
-            $speed_upload           = $speed_upload_amount * 1000; //Default is kbps
+            $speed_upload           = $speed_upload_amount * 1024; //Default is kbps
             if($speed_upload_unit == 'mbps'){
-                $speed_upload = $speed_upload * 1000;   
+                $speed_upload = $speed_upload * 1024;   
             }
             
             $d_up = [
@@ -850,9 +876,9 @@ class ProfilesController extends AppController
             
             $speed_download_amount  = $this->request->data['speed_download_amount'];
             $speed_download_unit    = $this->request->data['speed_download_unit'];
-            $speed_download         = $speed_download_amount * 1000; //Default is kbps
+            $speed_download         = $speed_download_amount * 1024; //Default is kbps
             if($speed_download_unit == 'mbps'){
-                $speed_download = $speed_download * 1000;   
+                $speed_download = $speed_download * 1024;   
             }
             
             $d_down = [
@@ -867,6 +893,17 @@ class ProfilesController extends AppController
             $this->{'Radgroupreplies'}->save($e_down);
 
         }
+        
+        //Fall Through      
+        $d_fall_through = [
+            'groupname' => $groupname,
+            'attribute' => 'Fall-Through',
+            'op'        => ':=',
+            'value'     => 'Yes',
+            'comment'   => 'SimpleProfile'        
+        ];
+        $e_ff = $this->{'Radgroupreplies'}->newEntity($d_fall_through );
+        $this->{'Radgroupreplies'}->save($e_ff );       
     }
     
     private function _getRadius($groupname){
@@ -881,21 +918,21 @@ class ProfilesController extends AppController
         foreach($e_list as $e){
             if($e->attribute == 'WISPr-Bandwidth-Max-Up'){
                 $bw_up_check = true;
-                if(intval($e->value) >= 1000000){
-                    $speed_upload_amount = $e->value / 1000 / 1000;
+                if(intval($e->value) >= 1048576){
+                    $speed_upload_amount = $e->value / 1024 / 1024;
                     $speed_upload_unit   = 'mbps';
                 }else{
-                    $speed_upload_amount = $e->value / 1000;
+                    $speed_upload_amount = $e->value / 1024;
                     $speed_upload_unit   = 'kbps';
                 }
             }
             if($e->attribute == 'WISPr-Bandwidth-Max-Down'){
                 $bw_down_check = true;
-                if(intval($e->value) >= 1000000){
-                    $speed_download_amount = $e->value / 1000 / 1000;
+                if(intval($e->value) >= 1048576){
+                    $speed_download_amount = $e->value / 1024 / 1024;
                     $speed_download_unit   = 'mbps';
                 }else{
-                    $speed_download_amount = $e->value / 1000;
+                    $speed_download_amount = $e->value / 1024;
                     $speed_download_unit   = 'kbps';
                 }
             }   
@@ -923,11 +960,11 @@ class ProfilesController extends AppController
             }
             if($e->attribute == 'Rd-Total-Data'){
                 $d = $e->value;
-                if(($d/1000) >= 1000000){
-                    $data['data_amount'] = ($d/1000000)/1000;
+                if(($d/1024) >= 1048576){
+                    $data['data_amount'] = ($d/1048576)/1024;
                     $data['data_unit'] = 'gb';
                 }else{
-                    $data['data_amount'] = $d/1000000;
+                    $data['data_amount'] = $d/1048576;
                     $data['data_unit'] = 'mb';
                 }
             }            
@@ -956,8 +993,14 @@ class ProfilesController extends AppController
                     $data['time_unit'] = 'min';
                 }
             }        
-        } 
-              
+        }
+        
+        if((!array_key_exists('data_amount',$data))&&(array_key_exists('data_reset',$data))){
+            $data['data_reset'] = 'top_up';        
+        }
+        if((!array_key_exists('time_amount',$data))&&(array_key_exists('time_reset',$data))){
+            $data['time_reset'] = 'top_up';        
+        }                
         return $data;
     }
     
