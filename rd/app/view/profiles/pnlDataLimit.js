@@ -33,7 +33,7 @@ Ext.define('Rd.view.profiles.pnlDataLimit', {
 			    items       : [
 			        {
                         xtype       : 'radiogroup',
-                        fieldLabel  : 'Resetz',
+                        fieldLabel  : 'Reset',
                         itemId      : 'rgrpDataReset',
                         width       : me.width,
                         columns     : 3,
