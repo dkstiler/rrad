@@ -18,6 +18,7 @@ class TopUpsController extends AppController{
         parent::initialize();
         $this->loadModel('TopUps'); 
         $this->loadModel('Users');
+        $this->loadModel('PermanentUsers');
           
         $this->loadComponent('Aa');
         $this->loadComponent('GridButtons');
@@ -165,8 +166,23 @@ class TopUpsController extends AppController{
         if(!$user){
             return;
         }
-        $this->_addOrEdit($user,'add');
         
+        //Set the permanent_user_id if the permanent_user is sent
+        if((isset($this->request->data['permanent_user']))&&(!isset($this->request->data['permanent_user_id']))){
+            $pu_name = $this->request->data['permanent_user'];
+            $pu = $this->{'PermanentUsers'}->find()->where(['PermanentUsers.username' => $pu_name])->first();
+            if($pu){        
+                $this->request->data['permanent_user_id'] = $pu->id;
+            }else{
+                $this->set([
+                    'success'   => false,
+                    'message'   => ['message' => __("Permanent Usser $pu_name NOT found")],
+                    '_serialize' => ['success','message']
+                ]);
+                return;
+            }        
+        }        
+        $this->_addOrEdit($user,'add');      
     }
     
     public function edit(){ 
