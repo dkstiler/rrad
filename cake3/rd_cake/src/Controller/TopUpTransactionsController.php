@@ -77,7 +77,12 @@ class TopUpTransactionsController extends AppController{
             } 
             
             $row['user']	        = $i->user->username;
-            $row['permanent_user']	= $i->real_permanent_user->username;   
+            if($i->real_permanent_user == null){
+                $row['permanent_user']	= "!! USER DELETED !!"; 
+            }else{
+                $row['permanent_user']	= $i->real_permanent_user->username;
+            }
+              
             $row['owner']           = $owner_tree;
 		
             array_push($items,$row);      
