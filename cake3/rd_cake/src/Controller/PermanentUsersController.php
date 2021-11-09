@@ -307,9 +307,11 @@ class PermanentUsersController extends AppController{
         $entity = $this->{$this->main_model}->newEntity($this->request->data());
          
         if($this->{$this->main_model}->save($entity)){
+            $reply_data         = $this->request->data();
+            $reply_data['id']   = $entity->id;
             $this->set(array(
                 'success' => true,
-                'data'    => $this->request->data(),
+                'data'    => $reply_data,
                 '_serialize' => ['success','data']
             ));
         }else{
